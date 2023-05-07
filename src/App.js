@@ -1,36 +1,34 @@
 import './App.css';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import ReactPaginate from "react-paginate";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Card, Container, Row, Col, Form } from 'react-bootstrap';
+import { Card, Container, Form } from 'react-bootstrap';
 import { Carousel, Button } from 'react-bootstrap';
+import { CardGroup } from 'react-bootstrap';
+import ImageUploader from 'react-image-upload'
+import 'react-image-upload/dist/index.css'
+import domtoimage from 'dom-to-image';
 
 function App() {
   const [memes, setMemes] = useState([]);
   const [index, setIndex] = useState(0);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [inputText, setInputText] = useState('');
-  const [displayText, setDisplayText] = useState('');
-  // const [totalPages, setTotalPages] = useState(0);
-  // const [itemOffset, setItemOffset] = useState(0);
-  // const memesPerPage = 1;
+  const [topText, setTopText] = useState('');
+  const [bottomText, setBottomText] = useState('');
+  const [displayTopText, setDisplayTopText] = useState('');
+  const [displayBottomText, setDisplayBottomText] = useState('');
 
   useEffect (() => {
-  // const endOffset = itemOffset + memesPerPage;  
   axios.get('https://api.imgflip.com/get_memes')
   .then(response => {
     console.log("1:", response.data)
     const data = response.data.data.memes
     console.log("2:", data);
     setMemes(data);
-    // setMemes(data.slice(itemOffset, endOffset));
-    // setTotalPages(Math.ceil(data.length / memesPerPage));
   })
   .catch(error => {
     console.log(error)
   });   
-  // }, [itemOffset, memesPerPage]);
 }, []);
 
   console.log("3:", memes)
@@ -40,41 +38,63 @@ function App() {
   };
 
   const handleImageSelect = (image) => {
+    console.log("4.2:", image);
     setSelectedImage(image);
   };
 
-  console.log("4:", selectedImage);
+  console.log("4.1:", selectedImage);
 
-  const handleNext = () => {
-    setIndex((prevIndex) => (prevIndex === memes.length - 1 ? 0 : prevIndex + 1));
+  const handleTopInputChange = (event) => {
+    setTopText(event.target.value);
   };
 
-  const handlePrev = () => {
-    setIndex((prevIndex) => (prevIndex === 0 ? memes.length - 1 : prevIndex - 1));
+  const handleBottomInputChange = (event) => {
+    setBottomText(event.target.value);
   };
 
-  const handleInputChange = (event) => {
-    setInputText(event.target.value);
-  };
+  console.log("5:", topText, bottomText)
 
   const handleButtonClick = () => {
-    setDisplayText(inputText);
+    setDisplayTopText(topText);
+    setDisplayBottomText(bottomText);
   };
 
-  // const handleChange = (page) => {
-  //   const newOffset = page.selected * memesPerPage;
-  //   console.log(
-  //   `User requested page number ${
-  //   page.selected + 1
-  //   }, which is offset ${newOffset}`
-  //   );
-  //   setItemOffset(newOffset);
-  // };
+  const handleResetButton = () => {
+    setDisplayTopText('');
+    setDisplayBottomText('');
+    setSelectedImage(null);
+    setTopText('');
+    setBottomText('');
+    runAfterImageDelete();
+  };
+
+  const downloadImage = () => {
+    domtoimage.toJpeg(document.getElementById('memeImage'), { quality: 1 })
+    .then(function (dataUrl) {
+        var link = document.createElement('a');
+        link.download = 'meme.jpeg';
+        link.href = dataUrl;
+        link.click();
+    });
+  };
+
+  function getImageFileObject(imageFile) {
+    // const url = imageFile.dataUrl.split("blob:")[1]
+    const uploadFileObj = { url: imageFile.dataUrl }
+    console.log("6.1:", uploadFileObj)
+
+    setSelectedImage(uploadFileObj);
+    console.log("6.2:", { imageFile })
+  }
+  
+  function runAfterImageDelete(file) {
+    console.log({ file })
+  }
 
   return (
     <div className="App">
-      <Container>
-        <div>
+      <div className='grid-container'>
+        <div className='grid-item'>
             <Card className='mb-2' 
               style={{
               display: 'flex', 
@@ -96,112 +116,116 @@ function App() {
                   ))
                   }
                 </Carousel>
+                <div></div>
+                <Card.Title>* Or upload an image</Card.Title>
+                <ImageUploader
+                onFileAdded={(img) => getImageFileObject(img)}
+                onFileRemoved={(img) => runAfterImageDelete(img)}
+              />
+
             </Card>
+
         </div>
 
-        <div>
-        <Card className='mb-2' 
-              style={{
-              padding: '10px',
-              width: "18rem",
-              display: 'flex',
-              justifyContent: 'center', 
-              alignItems: 'center', 
-              }}
-            >
+        <div className='grid-item'>
+            <Card className='mb-2' 
+                  style={{
+                  padding: '10px',
+                  width: "18rem",
+                  display: 'flex',
+                  justifyContent: 'center', 
+                  alignItems: 'center', 
+                  }}>
               <Card.Title> Step 2: Edit your meme caption.</Card.Title>
 
               <Form>
-                <Row style={{ display: 'flex', justifyContent: 'center', alignItems: 'center',}}>
-                  <Col md style={{padding: '10px',}}>
-                    <Form.Group>
-                      {/* <Form.Label>Top Meme</Form.Label> */}
-                      <Form.Control 
-                        type="text" 
-                        value={inputText} 
-                        onChange={handleInputChange}
-                        placeholder='Type your Top meme caption here' />
-                    </Form.Group>
-                  </Col>
+                  <Form.Group className="mb-3">
+                    <Form.Control type="text" 
+                      value={topText}
+                      placeholder='Top Text'
+                      onChange={handleTopInputChange} />
+                  </Form.Group> 
 
-                  <Col md style={{padding: '10px',}}>
-                  <Form.Group>
-                      {/* <Form.Label>Bottom Meme</Form.Label> */}
-                      <Form.Control type="text" placeholder='Type your Bottom meme caption here' />
-                    </Form.Group>
-                  </Col>
+                  <Form.Group className="mb-3">
+                    <Form.Control type="text" 
+                      value={bottomText}
+                      placeholder='Bottom Text'
+                      onChange={handleBottomInputChange} />
+                  </Form.Group>
 
-                  <Button as="input" type="submit" value="Submit" variant="dark"
-                    onClick={handleButtonClick} 
-                    style={{width: '100px', height: '40px', fontSize: '16px' }}
-                    />{' '}
-                </Row>
+                  <Button variant="dark" onClick={handleButtonClick}>
+                    DISPLAY
+                  </Button>
               </Form>
-
-              <Card.Img variant="top" src={selectedImage?.url} />
-
-        </Card>
+            </Card>
 
         </div>
 
-        {/* <Card className='mb-3' 
-        style={{
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        padding: '2rem',
-        // paddingLeft: '12rem',
-        width: "350px"
-        }}
-        >
-        {
-          memes.map((meme) => (
-            <Card.Img src={meme.url}
-              style={{
-                  display: 'flex', 
+        <div className='grid-item'>
+            <Card className='mb-2' 
+                  style={{
+                  // padding: '10px',
+                  width: "18rem",
+                  display: 'flex',
                   justifyContent: 'center', 
                   alignItems: 'center', 
-                  padding: '10px',
-                  width: "300px"
                   }}
-            /> 
-            ))
-        }
-        <Card.ImgOverlay>
-          <Card.Title>Choose an Image</Card.Title>
+                >
+                  <Card.Title>PREVIEW</Card.Title>
+                  <div id="memeImage">
+                  <Card.Img variant="top" src={selectedImage?.url}
+                    style={{
+                      display: 'flex', 
+                      justifyContent: 'center', 
+                      alignItems: 'center', 
+                      padding: '10px',
+                      width: "300px"
+                      }} />
 
-          <Card.Text className='meme-toptext'>{displayText}</Card.Text>
+                  <Card.ImgOverlay >
+                    <Card.Text 
+                        style={{ 
+                          fontFamily: "Impact",
+                          fontSize: "20px",
+                          color: "blue",
+                          textShadow: "1px 1px white", 
+                          letterSpacing: "1px",
+                          position: "relative",
+                          top: "6%",
+                          margin: "0",
+                          overflow: "hidden",
+                        }}>{displayTopText}
+                    </Card.Text>
 
-          <Card.Text className='meme-bottomtext'>
-          Meme quote goes here and so on and on and on and on and on
-          </Card.Text>
+                    <Card.Text 
+                      style={{ 
+                        fontFamily: "Impact",
+                        fontSize: "20px",
+                        color: "blue",
+                        textShadow: "1px 1px white", 
+                        letterSpacing: "1px",
+                        position: "absolute",
+                        bottom: "15%",
+                        width: "90%",
+                        margin: "0",
+                        overflow: "hidden",
+                        }}>{displayBottomText}</Card.Text>
+                    </Card.ImgOverlay>
 
-        </Card.ImgOverlay>
-          {/* <Card.Body>
-            <Card.Title>Title</Card.Title>    
-            <Card.Text>Some text here</Card.Text>
-        </Card.Body>
-       </Card> */}
-{/* 
-        <ReactPaginate className="pagination"
-            nextLabel="Next >"
-            previousLabel="< Previous"
-            breakLabel="..."
-            onPageChange={handleChange}
-            pageCount={totalPages}
-            pageClassName="page-item"
-            pageLinkClassName="page-link"
-            nextClassName="page-item"
-            nextLinkClassName="page-link"
-            previousLinkClassName="page-link"
-            breakClassName="page-item"
-            breakLinkClassName="page-link"
-            containerClassName="pagination"
-            activeClassName="active"
-            pageRangeDisplayed={3}
-            marginPagesDisplayed={2}
-            /> */}
-      </Container>
+                  </div>
+              
+            </Card>
+
+            <div className="button-container"> 
+              <Button variant="info"
+              onClick={downloadImage}> SAVE</Button>
+              <Button variant="danger" 
+              onClick={handleResetButton}>START OVER</Button>
+            </div>
+        </div>
+
+      </div>
+
     </div>
   );
 }
