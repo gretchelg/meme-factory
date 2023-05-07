@@ -15,26 +15,27 @@
 .button-container {
   display: flex;
   justify-content: space-evenly;
-  /* border: 2px solid green; */
   font-weight: bolder;
 }
 
 .grid-container {
-  /* border: 2px solid red; */
   margin: auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, 400px);
+  grid-template-columns: repeat(auto-fit, 350px);
   gap: 10px;
   place-content: center;
 }
 
 .grid-item {
-  /* border: 2px solid blue;  */
   display: flex;
   flex-direction: column;
-  width: 400px;
-  padding: 2rem;
+  width: 350px;
+  padding: 1px;
   position: relative;
+}
+
+h1 {
+  color: aliceblue;
 }
 
 

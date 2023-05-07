@@ -2,9 +2,8 @@ import './App.css';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Card, Container, Form } from 'react-bootstrap';
+import { Card, Form } from 'react-bootstrap';
 import { Carousel, Button } from 'react-bootstrap';
-import { CardGroup } from 'react-bootstrap';
 import ImageUploader from 'react-image-upload'
 import 'react-image-upload/dist/index.css'
 import domtoimage from 'dom-to-image';
@@ -21,9 +20,7 @@ function App() {
   useEffect (() => {
   axios.get('https://api.imgflip.com/get_memes')
   .then(response => {
-    console.log("1:", response.data)
     const data = response.data.data.memes
-    console.log("2:", data);
     setMemes(data);
   })
   .catch(error => {
@@ -31,18 +28,13 @@ function App() {
   });   
 }, []);
 
-  console.log("3:", memes)
-
   const handleSelect = (selectedIndex, e) => {
     setIndex(selectedIndex);
   };
 
   const handleImageSelect = (image) => {
-    console.log("4.2:", image);
     setSelectedImage(image);
   };
-
-  console.log("4.1:", selectedImage);
 
   const handleTopInputChange = (event) => {
     setTopText(event.target.value);
@@ -51,8 +43,6 @@ function App() {
   const handleBottomInputChange = (event) => {
     setBottomText(event.target.value);
   };
-
-  console.log("5:", topText, bottomText)
 
   const handleButtonClick = () => {
     setDisplayTopText(topText);
@@ -65,7 +55,6 @@ function App() {
     setSelectedImage(null);
     setTopText('');
     setBottomText('');
-    runAfterImageDelete();
   };
 
   const downloadImage = () => {
@@ -79,12 +68,8 @@ function App() {
   };
 
   function getImageFileObject(imageFile) {
-    // const url = imageFile.dataUrl.split("blob:")[1]
     const uploadFileObj = { url: imageFile.dataUrl }
-    console.log("6.1:", uploadFileObj)
-
     setSelectedImage(uploadFileObj);
-    console.log("6.2:", { imageFile })
   }
   
   function runAfterImageDelete(file) {
@@ -162,54 +147,55 @@ function App() {
         </div>
 
         <div className='grid-item'>
-            <Card className='mb-2' 
+          <h1>PREVIEW</h1>
+            <Card id="memeImage" className='mb-2' 
                   style={{
-                  // padding: '10px',
                   width: "18rem",
                   display: 'flex',
                   justifyContent: 'center', 
                   alignItems: 'center', 
                   }}
                 >
-                  <Card.Title>PREVIEW</Card.Title>
                   <div id="memeImage">
-                  <Card.Img variant="top" src={selectedImage?.url}
-                    style={{
-                      display: 'flex', 
-                      justifyContent: 'center', 
-                      alignItems: 'center', 
-                      padding: '10px',
-                      width: "300px"
-                      }} />
+                    <Card.Img variant="top" src={selectedImage?.url}
+                      style={{
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        padding: '10px',
+                        width: "300px"
+                        }}>
+                    </Card.Img>
 
-                  <Card.ImgOverlay >
-                    <Card.Text 
+                    <Card.ImgOverlay >
+                      <Card.Text 
+                          style={{ 
+                            fontFamily: "Impact",
+                            fontSize: "24px",
+                            color: "blue",
+                            textShadow: "1px 1px white", 
+                            letterSpacing: "1px",
+                            // position: "relative",
+                            // top: "6%",
+                            margin: "0",
+                            overflow: "hidden",
+                          }}>{displayTopText}
+                      </Card.Text>
+
+                      <Card.Text 
                         style={{ 
                           fontFamily: "Impact",
-                          fontSize: "20px",
+                          fontSize: "24px",
                           color: "blue",
                           textShadow: "1px 1px white", 
                           letterSpacing: "1px",
-                          position: "relative",
-                          top: "6%",
+                          position: "absolute",
+                          bottom: "10%",
+                          width: "90%",
                           margin: "0",
                           overflow: "hidden",
-                        }}>{displayTopText}
-                    </Card.Text>
-
-                    <Card.Text 
-                      style={{ 
-                        fontFamily: "Impact",
-                        fontSize: "20px",
-                        color: "blue",
-                        textShadow: "1px 1px white", 
-                        letterSpacing: "1px",
-                        position: "absolute",
-                        bottom: "15%",
-                        width: "90%",
-                        margin: "0",
-                        overflow: "hidden",
-                        }}>{displayBottomText}</Card.Text>
+                          }}>{displayBottomText}
+                      </Card.Text>
                     </Card.ImgOverlay>
 
                   </div>
