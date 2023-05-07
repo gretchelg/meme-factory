@@ -94,7 +94,7 @@ function App() {
                   {
                   memes.map((meme, i) => (
                     <Carousel.Item key={i} onClick={() => handleImageSelect(meme)}>  
-                      <img className="d-block w-100" src={meme.url} 
+                      <img className="d-block w-100" src={meme.url } alt="meme" 
                       style={{ objectFit: 'cover', height: 'auto' }}
                       /> 
                     </Carousel.Item>  
